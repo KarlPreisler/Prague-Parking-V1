@@ -1,10 +1,6 @@
 ﻿internal class Program
 {
-    static void Main()
-    {
-        Console.WriteLine("Prague Parking V1");
-    }
-
+    
     const string Bil = "CAR";
 
     const string MC = "MC";
@@ -21,6 +17,56 @@
 
     static string[] parkeringshus = new string[TotalaPlatser];
 
+    static void Main()
+    {
+        Console.Title = "Prague Parking V1";
+        bool körProgrammet = true;
+
+        while (körProgrammet)
+        {
+            VisaMeny();
+
+            int menyval = LäsHeltal("Välj ett alternativ (0-5): ", 0, 5);
+
+            switch (menyval)
+            {
+                case 0:
+                    körProgrammet = false;
+                    break;
+            }
+
+            if (körProgrammet)
+            {
+                VäntaPåEnter();
+            }
+        }
+
+        SkrivOK("Programmet avslutas. Tack och hej då!");
+    }
+
+    static void VisaMeny()
+    {
+        VisaRubrik("PRAGUE PARKING - HUVUDMENY");
+
+        int lediga = RäknaTommaPlatser();
+
+        int fordon = RäknaParkeradeFordon();
+
+        SkrivInfo($"Tomma platser: {lediga} av {TotalaPlatser}   Parkerade fordon: {fordon}");
+
+        Console.WriteLine();
+
+        Console.WriteLine("1. Parkera fordon");
+        Console.WriteLine("2. Flytta fordon");
+        Console.WriteLine("3. Hämta ut fordon");
+        Console.WriteLine("4. Sök fordon");
+        Console.WriteLine("5. Visa parkeringshuset");
+        Console.WriteLine("0. Avsluta");
+
+        Console.WriteLine();
+    }
+
+
     static bool ÄrPlatsTom(int index)
     {
         return string.IsNullOrEmpty(parkeringshus[index]);
@@ -36,6 +82,33 @@
         }
 
         return HämtaTyp(fordonLista[0]) == MC;
+    }
+
+    static int RäknaTommaPlatser()
+    {
+        int antal = 0;
+
+        for (int index = 0; index < parkeringshus.Length; index++)
+        {
+            if (ÄrPlatsTom(index))
+            {
+                antal++;
+            }
+        }
+
+        return antal;
+    }
+
+    static int RäknaParkeradeFordon()
+    {
+        int antal = 0;
+
+        for (int index = 0; index < parkeringshus.Length; index++)
+        {
+            antal += DelaUppPlats(parkeringshus[index]).Length;
+        }
+
+        return antal;
     }
 
     static string SkapaFordon(string typ, string regnr)
@@ -66,4 +139,84 @@
 
         return innehåll.Split(McSkiljetecken);
     }
+
+    static int LäsHeltal(string ledtext, int min, int max)
+    {
+        while (true)
+        {
+            string text = LäsText(ledtext);
+
+            if (int.TryParse(text, out int tal) && tal >= min && tal <= max)
+            {
+                return tal;
+            }
+
+            SkrivFel($"Felaktig inmatning. Skriv ett heltal mellan {min} och {max}.");
+        }
+    }
+
+    static string LäsText(string ledtext)
+    {
+        Console.Write(ledtext);
+
+        string text = Console.ReadLine() ?? "";
+
+        return text.Trim();
+    }
+
+    static void VisaRubrik(string rubrik)
+    {
+        RensaSkärmen();
+
+        SkrivFärgad($"===== {rubrik} =====", ConsoleColor.Cyan);
+
+        Console.WriteLine();
+    }
+
+    static void RensaSkärmen()
+    {
+        if (!Console.IsOutputRedirected)
+        {
+            Console.Clear();
+        }
+    }
+
+    static void VäntaPåEnter()
+    {
+        Console.WriteLine();
+
+        LäsText("Tryck Enter för att återgå till menyn...");
+    }
+
+    static void SkrivFärgad(string text, ConsoleColor färg)
+    {
+        SkrivFärgadPåRad(text, färg);
+
+        Console.WriteLine();
+    }
+
+    static void SkrivFärgadPåRad(string text, ConsoleColor färg)
+    {
+        Console.ForegroundColor = färg;
+
+        Console.Write(text);
+
+        Console.ResetColor();
+    }
+
+    static void SkrivFel(string meddelande)
+    {
+        SkrivFärgad(meddelande, ConsoleColor.Red);
+    }
+
+    static void SkrivOK(string meddelande)
+    {
+        SkrivFärgad(meddelande, ConsoleColor.Green);
+    }
+
+    static void SkrivInfo(string meddelande)
+    {
+        SkrivFärgad(meddelande, ConsoleColor.Yellow);
+    }
 }
+
