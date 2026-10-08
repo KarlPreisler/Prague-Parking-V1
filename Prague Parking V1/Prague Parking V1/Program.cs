@@ -10,4 +10,5 @@ const char Typskiljetecken = '#';
 
 const char McSkiljetecken = '|';
 
-const string TeckenFörReg = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const string TeckenFörReg = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ÜÇĞŞİČĆĐŠŽØÆ";
+
