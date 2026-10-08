@@ -1,13 +1,22 @@
-﻿const string Bil = "CAR";
+﻿internal class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Prague Parking V1");
+    }
 
-const string MC = "MC"; 
+    const string Bil = "CAR";
 
-const int TotalaPlatser = 100;
+    const string MC = "MC";
 
-const int TotalRegLängd = 10;
+    const int TotalaPlatser = 100;
 
-const char Typskiljetecken = '#';
+    const int TotalRegLängd = 10;
 
-const char McSkiljetecken = '|';
+    const char Typskiljetecken = '#';
 
-const string TeckenFörReg = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ÜÇĞŞİČĆĐŠŽØÆ";
+    const char McSkiljetecken = '|';
+
+    const string TeckenFörReg = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ÜÇĞŞİČĆĐŠŽØÆ";
+
+}
