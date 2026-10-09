@@ -33,7 +33,9 @@
                 case 1:
                     HanteraParkering();
                     break;
-
+                case 5:
+                    VisaParkeringshuset();
+                    break;
                 case 0:
                     körProgrammet = false;
                     break;
@@ -120,11 +122,115 @@
 
         return index;
     }
+
+    static void VisaParkeringshuset()
+    {
+        VisaRubrik("PARKERINGSHUSET");
+
+        VisaÖversikt();
+
+        Console.WriteLine();
+
+        VisaUpptagnaPlatser();
+    }
+
+    static void VisaÖversikt()
+    {
+        Console.Write("Förklaring: ");
+        SkrivFärgadPåRad("Tom  ", ConsoleColor.Green);
+        SkrivFärgadPåRad("En MC (plats för en till)  ", ConsoleColor.Yellow);
+        SkrivFärgadPåRad("Full", ConsoleColor.Red);
+        Console.WriteLine();
+        Console.WriteLine();
+
+        for (int index = 0; index < parkeringshus.Length; index++)
+        {
+            SkrivFärgadPåRad($"{index + 1,5}", PlatsFärg(index));
+
+            if ((index + 1) % 10 == 0)
+            {
+                Console.WriteLine();
+            }
+        }
+    }
+
+    static void VisaUpptagnaPlatser()
+    {
+        Console.WriteLine("Upptagna platser:");
+
+        int antalUpptagna = 0;
+
+        for (int index = 0; index < parkeringshus.Length; index++)
+        {
+            if (ÄrPlatsTom(index))
+            {
+                continue;
+            }
+
+            VisaPlats(index);
+
+            antalUpptagna++;
+        }
+
+        if (antalUpptagna == 0)
+        {
+            SkrivInfo("Parkeringshuset är tomt.");
+        }
+    }
+
+    static void VisaPlats(int index)
+    {
+        string rad = $"Plats {index + 1,3}: {PlatsBeskrivning(index)}";
+
+        SkrivFärgad(rad, PlatsFärg(index));
+    }
+
+    static string PlatsBeskrivning(int index)
+    {
+        if (ÄrPlatsTom(index))
+        {
+            return "Tom";
+        }
+
+        string beskrivning = "";
+
+        foreach (string fordon in DelaUppPlats(parkeringshus[index]))
+        {
+            if (beskrivning != "")
+            {
+                beskrivning += " + ";
+            }
+
+            beskrivning += FordonBeskrivning(fordon);
+        }
+
+        return beskrivning;
+    }
+
+    static string FordonBeskrivning(string fordon)
+    {
+        return $"{TypTillText(HämtaTyp(fordon))} {HämtaRegnr(fordon)}";
+    }
+
     static string TypTillText(string typ)
     {
         return typ == Bil ? "Bil" : "MC";
     }
 
+    static ConsoleColor PlatsFärg(int index)
+    {
+        if (ÄrPlatsTom(index))
+        {
+            return ConsoleColor.Green;
+        }
+
+        if (ÄrEnsamMC(index))
+        {
+            return ConsoleColor.Yellow;
+        }
+
+        return ConsoleColor.Red;
+    }
     static bool SökFordon(string regnr, out int platsIndex)
     {
         for (int index = 0; index < parkeringshus.Length; index++)
