@@ -33,6 +33,9 @@
                 case 1:
                     HanteraParkering();
                     break;
+                case 4:
+                    HanteraSökning ();
+                    break;
                 case 5:
                     VisaParkeringshuset();
                     break;
@@ -121,6 +124,29 @@
         LäggTillFordon(index, SkapaFordon(typ, regnr));
 
         return index;
+    }
+
+    static void HanteraSökning()
+    {
+        VisaRubrik("SÖK FORDON");
+
+        string regnr = LäsRegnr("Regnr att söka efter (tomt = avbryt): ");
+
+        if (regnr == "")
+        {
+            SkrivInfo("Avbrutet. Ingen sökning gjordes.");
+            return;
+        }
+
+        if (!SökFordon(regnr, out int index))
+        {
+            SkrivFel($"Hittade inget fordon med regnr {regnr}.");
+            return;
+        }
+
+        SkrivOK($"{regnr} står på plats {index + 1}.");
+
+        VisaPlats(index);
     }
 
     static void VisaParkeringshuset()
