@@ -66,7 +66,6 @@
         Console.WriteLine();
     }
 
-
     static bool ÄrPlatsTom(int index)
     {
         return string.IsNullOrEmpty(parkeringshus[index]);
@@ -164,6 +163,99 @@
         return text.Trim();
     }
 
+    static string LäsRegnr(string ledtext)
+    {
+        while (true)
+        {
+            string regnr = NormaliseraRegnr(LäsText(ledtext));
+
+            if (regnr == "")
+            {
+                return "";
+            }
+
+            if (ÄrGiltigtRegnr(regnr))
+            {
+                return regnr;
+            }
+
+            SkrivFel($"Ogiltigt regnr. Högst {TotalRegLängd} tecken, vänligen försök igen.");
+        }
+    }
+
+    static string LäsFordonstyp()
+    {
+        int val = LäsHeltal("Fordonstyp (1 = Bil, 2 = MC, 0 = avbryt): ", 0, 2);
+
+        if (val == 1)
+        {
+            return Bil;
+        }
+
+        if (val == 2)
+        {
+            return MC;
+        }
+
+        return "";
+    }
+
+    static string NormaliseraRegnr(string text)
+    {
+        return TaBortMellanslag(text).ToUpper();
+    }
+
+    static string TaBortMellanslag(string text)
+    {
+        string resultat = "";
+
+        foreach (char tecken in text)
+        {
+            if (tecken != ' ')
+            {
+                resultat += tecken;
+            }
+        }
+
+        return resultat;
+    }
+
+    static bool ÄrGiltigtRegnr(string regnr)
+    {
+        if (string.IsNullOrEmpty(regnr))
+        {
+            return false;
+        }
+
+        if (regnr.Length > TotalRegLängd)
+        {
+            return false;
+        }
+
+        foreach (char tecken in regnr)
+        {
+            if (!ÄrTillåtetTecken(tecken))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    static bool ÄrTillåtetTecken(char tecken)
+    {
+        foreach (char tillåtet in TeckenFörReg)
+        {
+            if (tecken == tillåtet)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     static void VisaRubrik(string rubrik)
     {
         RensaSkärmen();
@@ -219,4 +311,3 @@
         SkrivFärgad(meddelande, ConsoleColor.Yellow);
     }
 }
-
