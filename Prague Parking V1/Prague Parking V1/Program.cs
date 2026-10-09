@@ -66,6 +66,134 @@
         Console.WriteLine();
     }
 
+    static void HanteraParkering()
+    {
+        VisaRubrik("PARKERA FORDON");
+
+        string typ = LäsFordonstyp();
+
+        if (typ == "")
+        {
+            SkrivInfo("Avbrutet. Inget fordon parkerades.");
+            return;
+        }
+
+        string regnr = LäsRegnr("Registreringsnummer (tomt = avbryt): ");
+
+        if (regnr == "")
+        {
+            SkrivInfo("Avbrutet. Inget fordon parkerades.");
+            return;
+        }
+
+        if (SökFordon(regnr, out int befintligtIndex))
+        {
+            SkrivFel($"Ett fordon med regnr {regnr} står redan på plats {befintligtIndex + 1}.");
+            return;
+        }
+
+        int index = ParkeraFordon(typ, regnr);
+
+        if (index == -1)
+        {
+            SkrivFel($"Tyvärr, det finns ingen ledig plats för {TypTillText(typ)}.");
+            return;
+        }
+
+        SkrivOK($"{TypTillText(typ)} {regnr} ska köras till plats {index + 1}.");
+    }
+
+    static int ParkeraFordon(string typ, string regnr)
+    {
+        int index = HittaLedigPlats(typ);
+
+        if (index == -1)
+        {
+            return -1;
+        }
+
+        LäggTillFordon(index, SkapaFordon(typ, regnr));
+
+        return index;
+    }
+    static string TypTillText(string typ)
+    {
+        return typ == Bil ? "Bil" : "MC";
+    }
+
+    static bool SökFordon(string regnr, out int platsIndex)
+    {
+        for (int index = 0; index < parkeringshus.Length; index++)
+        {
+            foreach (string fordon in DelaUppPlats(parkeringshus[index]))
+            {
+                if (HämtaRegnr(fordon) == regnr)
+                {
+                    platsIndex = index;
+                    return true;
+                }
+            }
+        }
+
+        platsIndex = -1;
+
+        return false;
+    }
+
+    static int HittaLedigPlats(string typ)
+    {
+        if (typ == MC)
+        {
+            int index = HittaEnsamMC();
+
+            if (index != -1)
+            {
+                return index;
+            }
+        }
+
+        return HittaTomPlats();
+    }
+
+    static int HittaEnsamMC()
+    {
+        for (int index = 0; index < parkeringshus.Length; index++)
+        {
+            if (ÄrEnsamMC(index))
+            {
+                return index;
+            }
+        }
+
+        return -1;
+    }
+
+    static int HittaTomPlats()
+    {
+        for (int index = 0; index < parkeringshus.Length; index++)
+        {
+            if (ÄrPlatsTom(index))
+            {
+                return index;
+            }
+        }
+
+        return -1;
+    }
+
+    static void LäggTillFordon(int index, string fordon)
+    {
+        if (ÄrPlatsTom(index))
+        {
+            parkeringshus[index] = fordon;
+        }
+        else
+        {
+            parkeringshus[index] = string.Join(McSkiljetecken, parkeringshus[index], fordon);
+        }
+    }
+
+
     static bool ÄrPlatsTom(int index)
     {
         return string.IsNullOrEmpty(parkeringshus[index]);
