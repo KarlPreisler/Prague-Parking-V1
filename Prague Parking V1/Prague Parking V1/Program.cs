@@ -30,6 +30,10 @@
 
             switch (menyval)
             {
+                case 1:
+                    HanteraParkering();
+                    break;
+
                 case 0:
                     körProgrammet = false;
                     break;
