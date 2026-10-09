@@ -33,6 +33,9 @@
                 case 1:
                     HanteraParkering();
                     break;
+                case 3:
+                    HanteraUthämtning();
+                    break;
                 case 4:
                     HanteraSökning ();
                     break;
@@ -124,6 +127,31 @@
         LäggTillFordon(index, SkapaFordon(typ, regnr));
 
         return index;
+    }
+
+    static void HanteraUthämtning()
+    {
+        VisaRubrik("HÄMTA UT FORDON");
+
+        string regnr = LäsRegnr("Regnr på fordonet som hämtas ut (tomt = avbryt): ");
+
+        if (regnr == "")
+        {
+            SkrivInfo("Avbrutet. Inget fordon hämtades ut.");
+            return;
+        }
+
+        if (!SökFordon(regnr, out int index))
+        {
+            SkrivFel($"Hittade inget fordon med regnr {regnr}.");
+            return;
+        }
+
+        string fordon = TaBortFordon(index, regnr);
+
+        SkrivOK($"{FordonBeskrivning(fordon)} hämtas ut från plats {index + 1}.");
+
+        VisaPlats(index);
     }
 
     static void HanteraSökning()
@@ -327,6 +355,33 @@
         {
             parkeringshus[index] = string.Join(McSkiljetecken, parkeringshus[index], fordon);
         }
+    }
+
+    static string TaBortFordon(int index, string regnr)
+    {
+        string borttaget = "";
+
+        string kvar = "";
+
+        foreach (string fordon in DelaUppPlats(parkeringshus[index]))
+        {
+            if (HämtaRegnr(fordon) == regnr)
+            {
+                borttaget = fordon;
+            }
+            else if (kvar == "")
+            {
+                kvar = fordon;
+            }
+            else
+            {
+                kvar = string.Join(McSkiljetecken, kvar, fordon);
+            }
+        }
+
+        parkeringshus[index] = kvar;
+
+        return borttaget;
     }
 
 
