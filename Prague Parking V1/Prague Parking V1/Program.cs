@@ -33,6 +33,9 @@
                 case 1:
                     HanteraParkering();
                     break;
+                case 2:
+                    HanteraFlytt();
+                    break;
                 case 3:
                     HanteraUthämtning();
                     break;
@@ -127,6 +130,64 @@
         LäggTillFordon(index, SkapaFordon(typ, regnr));
 
         return index;
+    }
+
+    static void HanteraFlytt()
+    {
+        VisaRubrik("FLYTTA FORDON");
+
+        string regnr = LäsRegnr("Regnr på fordonet som ska flyttas (tomt = avbryt): ");
+
+        if (regnr == "")
+        {
+            SkrivInfo("Avbrutet. Inget fordon flyttades.");
+            return;
+        }
+
+        if (!SökFordon(regnr, out int frånIndex))
+        {
+            SkrivFel($"Hittade inget fordon med regnr {regnr}.");
+            return;
+        }
+
+        string fordon = HämtaFordonPåPlats(frånIndex, regnr);
+
+        string typ = HämtaTyp(fordon);
+
+        SkrivInfo($"{TypTillText(typ)} {regnr} står på plats {frånIndex + 1}.");
+
+        int tillPlats = LäsHeltal($"Flytta till plats (1-{TotalaPlatser}, 0 = avbryt): ", 0, TotalaPlatser);
+
+        if (tillPlats == 0)
+        {
+            SkrivInfo("Avbrutet. Inget fordon flyttades.");
+            return;
+        }
+
+        int tillIndex = tillPlats - 1;
+
+        if (tillIndex == frånIndex)
+        {
+            SkrivFel($"{regnr} står redan på plats {tillPlats}.");
+            return;
+        }
+
+        if (!KanFordonStåPå(tillIndex, typ))
+        {
+            SkrivFel($"Plats {tillPlats} är upptagen: {PlatsBeskrivning(tillIndex)}.");
+            return;
+        }
+
+        FlyttaFordon(regnr, frånIndex, tillIndex);
+
+        SkrivOK($"Kör {TypTillText(typ)} {regnr} från plats {frånIndex + 1} till plats {tillPlats}.");
+    }
+
+    static void FlyttaFordon(string regnr, int frånIndex, int tillIndex)
+    {
+        string fordon = TaBortFordon(frånIndex, regnr);
+
+        LäggTillFordon(tillIndex, fordon);
     }
 
     static void HanteraUthämtning()
@@ -304,10 +365,24 @@
         return false;
     }
 
+    static string HämtaFordonPåPlats(int index, string regnr)
+    {
+        foreach (string fordon in DelaUppPlats(parkeringshus[index]))
+        {
+            if (HämtaRegnr(fordon) == regnr)
+            {
+                return fordon;
+            }
+        }
+
+        return "";
+    }
+
     static int HittaLedigPlats(string typ)
     {
         if (typ == MC)
         {
+            // Låt motorcyklar dela plats innan en helt tom plats används.
             int index = HittaEnsamMC();
 
             if (index != -1)
@@ -353,6 +428,7 @@
         }
         else
         {
+            // Flera motorcyklar kan dela samma plats och separeras med '|'.
             parkeringshus[index] = string.Join(McSkiljetecken, parkeringshus[index], fordon);
         }
     }
@@ -402,6 +478,16 @@
         return HämtaTyp(fordonLista[0]) == MC;
     }
 
+    static bool KanFordonStåPå(int index, string typ)
+    {
+        if (ÄrPlatsTom(index))
+        {
+            return true;
+        }
+
+        return typ == MC && ÄrEnsamMC(index);
+    }
+
     static int RäknaTommaPlatser()
     {
         int antal = 0;
@@ -431,6 +517,7 @@
 
     static string SkapaFordon(string typ, string regnr)
     {
+        // Format: fordonstyp#registreringsnummer, exempelvis MC#ABC123.
         return string.Join(Typskiljetecken, typ, regnr);
     }
 
@@ -454,7 +541,7 @@
         {
             return new string[0];
         }
-
+        // Delar upp platsens innehåll i separata fordon.
         return innehåll.Split(McSkiljetecken);
     }
 
@@ -521,6 +608,7 @@
 
     static string NormaliseraRegnr(string text)
     {
+        // Gör registreringsnummer konsekventa före validering och sökning.
         return TaBortMellanslag(text).ToUpper();
     }
 
