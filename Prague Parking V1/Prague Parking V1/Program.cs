@@ -1,6 +1,5 @@
 ﻿internal class Program
 {
-    
     const string Bil = "CAR";
 
     const string MC = "MC";
@@ -117,6 +116,7 @@
 
         SkrivOK($"{TypTillText(typ)} {regnr} ska köras till plats {index + 1}.");
     }
+    // Returnerar -1 om ingen plats finns.
 
     static int ParkeraFordon(string typ, string regnr)
     {
@@ -378,11 +378,14 @@
         return "";
     }
 
+    // Returnerar -1 om ingen plats finns.
+
     static int HittaLedigPlats(string typ)
     {
+        // En MC ställs i första hand bredvid en ensam MC, så att MC's packas två och två
+        // och färre platser blir halvfulla.
         if (typ == MC)
         {
-            // Låt motorcyklar dela plats innan en helt tom plats används.
             int index = HittaEnsamMC();
 
             if (index != -1)
@@ -420,6 +423,9 @@
         return -1;
     }
 
+    // Kontrollerar inte kapacitet – anroparen måste först ha kollat att platsen är tom
+    // eller har en ensam MC (HittaLedigPlats / KanFordonStåPå).
+
     static void LäggTillFordon(int index, string fordon)
     {
         if (ÄrPlatsTom(index))
@@ -428,10 +434,12 @@
         }
         else
         {
-            // Flera motorcyklar kan dela samma plats och separeras med '|'.
             parkeringshus[index] = string.Join(McSkiljetecken, parkeringshus[index], fordon);
         }
     }
+
+    // Bygger upp platsens text igen utan det borttagna fordonet.
+    // Blir platsen tom sparas "" (inte null).
 
     static string TaBortFordon(int index, string regnr)
     {
@@ -463,6 +471,7 @@
 
     static bool ÄrPlatsTom(int index)
     {
+        // null från start, "" efter att sista fordonet tagits bort (se TaBortFordon).
         return string.IsNullOrEmpty(parkeringshus[index]);
     }
 
@@ -517,7 +526,6 @@
 
     static string SkapaFordon(string typ, string regnr)
     {
-        // Format: fordonstyp#registreringsnummer, exempelvis MC#ABC123.
         return string.Join(Typskiljetecken, typ, regnr);
     }
 
@@ -541,7 +549,6 @@
         {
             return new string[0];
         }
-        // Delar upp platsens innehåll i separata fordon.
         return innehåll.Split(McSkiljetecken);
     }
 
@@ -569,6 +576,8 @@
         return text.Trim();
     }
 
+    // Returnerar "" om användaren lämnar raden tom (= avbryt).
+
     static string LäsRegnr(string ledtext)
     {
         while (true)
@@ -589,6 +598,8 @@
         }
     }
 
+    // Returnerar "" om användaren väljer 0 (= avbryt).
+
     static string LäsFordonstyp()
     {
         int val = LäsHeltal("Fordonstyp (1 = Bil, 2 = MC, 0 = avbryt): ", 0, 2);
@@ -608,7 +619,6 @@
 
     static string NormaliseraRegnr(string text)
     {
-        // Gör registreringsnummer konsekventa före validering och sökning.
         return TaBortMellanslag(text).ToUpper();
     }
 
@@ -674,6 +684,7 @@
 
     static void RensaSkärmen()
     {
+        // Console.Clear() kastar IOException om utmatningen är omdirigerad (t.ex. till en fil).
         if (!Console.IsOutputRedirected)
         {
             Console.Clear();
